@@ -48,8 +48,6 @@ console.log('huh');
             var self = this;
 
             $.each(array, function (index, string) {
-                console.log(this, index, string);
-
                 if (string.contains("Rated: ")) {
                     self.rated = this.replace(/Rated: /, "");
                 }
@@ -116,10 +114,66 @@ console.log('huh');
         }
     };
 
+    var FullStoryLoader = {
+        chapters: null,
+        currentChapter: null,
+        $appendToEl: null,
+        maxChapter: null,
+        isStoryPage: function(){
+            return window.location.pathname.indexOf("fanfiction.net/s/") !== 0
+        },
+        getChapterAmount: function(){
+            var $lastOption = $('#chap_select').find("option:last");
+            var lastChapter = + $lastOption[0].value; // unary plus to cast to int
+
+            return lastChapter;
+        },
+        getUrlForChapter: function(chapterNumber){
+            var pathname = window.location.pathname;
+            var arr = pathname.split('/');
+            var lastThreeElements = arr.slice(Math.max(arr.length - 3, 1));
+
+            var storyId = lastThreeElements[0].toString();
+            this.currentChapter = lastThreeElements[1];
+            var title = lastThreeElements[2].toString();
+
+            var newChapterUrl =
+                window.location.origin +
+                    "/s/" + storyId +
+                    "/" + chapterNumber.toString() +
+                    "/" + title;
+
+            return newChapterUrl;
+        },
+        bind: function(){
+            var self = this;
+            $document.on('loadChapter', function(event, chapterNumber, $el){
+                console.log(chapterNumber, $el);
+
+                $.get(self.getUrlForChapter(chapterNumber), function(html){
+                    var content = $(html).find('#storytext').html();
+                    $el.html(content);
+                }, 'html');
+            });
+        },
+        init: function() {
+            this.bind();
+            this.$appendToEl = $('#storytext');
+
+            for (var i = 2; i <= this.getChapterAmount(); i++) {
+                var $div = $('<div>', {class: "prefilled-chapter chapter"+ i.toString()});
+                this.$appendToEl.append($div);
+                $document.trigger('loadChapter', [i, $div]);
+            }
+        }
+    }
+
 
     $document.ready(function(){
         var $searchBox = $("#myform");
         SearchBoxPrefiller.init($searchBox);
+
+        FullStoryLoader.init();
 
         /**
          * Set Standard Search Options
