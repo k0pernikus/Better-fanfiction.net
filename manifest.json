@@ -4,7 +4,7 @@
   "version": "0.1",
   "description": "Provides a better fanfiction.net reading experience.",
   "permissions": [
-    "tabs", "*://www.fanfiction.net/*"
+    "tabs", "*://www.fanfiction.net/*", "unlimitedStorage", "storage"
   ],
   "content_scripts": [
     {

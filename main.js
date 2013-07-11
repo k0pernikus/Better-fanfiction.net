@@ -4,8 +4,54 @@ console.log('huh');
  * More human readable update dates
  */
 
-(function($, document, String) {
+(function($, document, chrome) {
     var $document = $(document);
+
+    jQuery.extend({
+        getCachedHTML: function (url, returnHtmlDataCallback) {
+            var cacheTimeInMs = 3600000;
+            var currentTimeInMs = new Date().getTime();
+
+            var cache = {
+                data:null,
+                timestamp:null
+            };
+
+            var getChapterContentByGetRequest = function(){
+                console.log('use getRequest');
+                $.get(url, function (data) {
+                    console.log('get request used');
+                    cache.data = data;
+                    cache.timestamp = new Date().getTime();
+
+                    var persist = {};
+                    persist[url] = cache;
+
+                    chrome.storage.local.set(persist);
+
+                    returnHtmlDataCallback(cache.data);
+                }, 'html');
+            }
+
+            chrome.storage.local.get(url, function(cachedUrl){
+                if (Object.keys(cachedUrl).length === 0) {
+                    getChapterContentByGetRequest();
+                    return;
+                }
+
+                var validCache = (currentTimeInMs - cachedUrl[url].timestamp) < cacheTimeInMs;
+
+                if (!validCache) {
+                    getChapterContentByGetRequest();
+                    return;
+                }
+
+                console.log('cache is valid');
+                returnHtmlDataCallback(cachedUrl[url].data);
+                return;
+            });
+        }
+    });
 
     /**
      * @param substring
@@ -148,26 +194,42 @@ console.log('huh');
         bind: function(){
             var self = this;
             $document.on('loadChapter', function(event, chapterNumber, $el){
-                console.log(chapterNumber, $el);
+                var url = self.getUrlForChapter(chapterNumber);
 
-                $.get(self.getUrlForChapter(chapterNumber), function(html){
+
+
+
+                $.getCachedHTML(url, function(html) {
+
                     var content = $(html).find('#storytext').html();
                     $el.html(content);
-                }, 'html');
+
+                    var chapterContent = {};
+                    chapterContent.createdAt = new Date();
+                    chapterContent.content = content;
+
+//                    chrome.storage.local.set({url: chapterContent}, function() {
+//                        console.log('content saved', chapterContent);
+//                    });
+
+
+                });
             });
         },
         init: function() {
+            if (!this.isStoryPage()){return};
+
             this.bind();
             this.$appendToEl = $('#storytext');
+            this.$appendToEl.empty();
 
-            for (var i = 2; i <= this.getChapterAmount(); i++) {
+            for (var i = 1; i <= this.getChapterAmount(); i++) {
                 var $div = $('<div>', {class: "prefilled-chapter chapter"+ i.toString()});
                 this.$appendToEl.append($div);
                 $document.trigger('loadChapter', [i, $div]);
             }
         }
     }
-
 
     $document.ready(function(){
         var $searchBox = $("#myform");
@@ -189,4 +251,4 @@ console.log('huh');
         var $twitter = $("iframe#twitter-widget-0");
         $twitter.closest("table").hide();
     });
-})(jQuery, document, String);
+})(jQuery, document, chrome);
