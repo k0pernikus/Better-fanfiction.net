@@ -9,7 +9,11 @@
   "content_scripts": [
     {
       "matches": ["*://www.fanfiction.net/*"],
-      "js": ["components/jquery/jquery.min.js", "main.js"],
+      "js": [
+          "components/jquery/jquery.min.js",
+          "components/underscore/underscore-min.js",
+          "main.js"
+      ],
       "css": ["style.css"],
       "run_at": "document_end",
       "all_frames": true

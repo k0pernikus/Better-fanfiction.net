@@ -1,5 +1,5 @@
 "use strict";
-(function($, document, chrome) {
+(function($, document, _, chrome) {
     var $document = $(document);
 
     jQuery.extend({
@@ -213,4 +213,4 @@
         var $twitter = $("iframe#twitter-widget-0");
         $twitter.closest("table").hide();
     });
-})(jQuery, document, chrome);
+})(jQuery, _, document, chrome);
