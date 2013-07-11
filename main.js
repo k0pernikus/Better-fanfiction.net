@@ -1,9 +1,4 @@
 "use strict";
-console.log('huh');
-/**
- * More human readable update dates
- */
-
 (function($, document, chrome) {
     var $document = $(document);
 
@@ -20,7 +15,6 @@ console.log('huh');
             var getChapterContentByGetRequest = function(){
                 console.log('use getRequest');
                 $.get(url, function (data) {
-                    console.log('get request used');
                     cache.data = data;
                     cache.timestamp = new Date().getTime();
 
@@ -69,7 +63,6 @@ console.log('huh');
 
     var Parser;
     Parser = {
-        ack: "amIstupid?",
         textToBeParsed: null,
         rated: null,
         language: null,
@@ -84,11 +77,6 @@ console.log('huh');
         relationships: null,
         init: function (textToBeParsed) {
             this.textToBeParsed = textToBeParsed;
-            /**
-             * textToBeParsed contains String in the from of:
-             * "Rated: T - English - Romance - Chapters: 10 - Words: 47,088 - Reviews: 158 - Favs: 68 - Follows: 143 - Updated: 7-7-13 - Published: 5-18-13 - OC James S. P."
-             * */
-
             var array = this.textToBeParsed.split(" - ");
 
             var self = this;
@@ -112,12 +100,6 @@ console.log('huh');
             });
         }
     }
-
-    /**
-     *
-     *
-     *  @type {{$form: null, $selectBoxes: null, config: {sortid: number, timeid: number, censorid: number, language: number, statusid: number}, setValuesForSelectboxes: Function, init: Function}}
-     */
 
     var SearchBoxPrefiller = {
         $form: null,
@@ -195,24 +177,9 @@ console.log('huh');
             var self = this;
             $document.on('loadChapter', function(event, chapterNumber, $el){
                 var url = self.getUrlForChapter(chapterNumber);
-
-
-
-
                 $.getCachedHTML(url, function(html) {
-
                     var content = $(html).find('#storytext').html();
                     $el.html(content);
-
-                    var chapterContent = {};
-                    chapterContent.createdAt = new Date();
-                    chapterContent.content = content;
-
-//                    chrome.storage.local.set({url: chapterContent}, function() {
-//                        console.log('content saved', chapterContent);
-//                    });
-
-
                 });
             });
         },
@@ -234,16 +201,11 @@ console.log('huh');
     $document.ready(function(){
         var $searchBox = $("#myform");
         SearchBoxPrefiller.init($searchBox);
-
         FullStoryLoader.init();
 
-        /**
-         * Set Standard Search Options
-         * TODO: Press Go Button
-         */
-        $("div.z-padtop2").each(function(){
-            Parser.init($(this).html());
-        });
+//        $("div.z-padtop2").each(function(){
+//            Parser.init($(this).html());
+//        });
 
         /**
          * Remove Twitter infos
