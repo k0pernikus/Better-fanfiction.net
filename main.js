@@ -9,7 +9,7 @@ console.log('huh');
 
     jQuery.extend({
         getCachedHTML: function (url, returnHtmlDataCallback) {
-            var cacheTimeInMs = 3600000;
+            var cacheTimeInMs = 1209600000; // two weeks
             var currentTimeInMs = new Date().getTime();
 
             var cache = {
