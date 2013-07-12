@@ -1,8 +1,9 @@
-"use strict";
-(function($, document, _, chrome) {
+(function($, _, document, chrome) {
+    "use strict";
+
     var $document = $(document);
 
-    jQuery.extend({
+    $.extend({
         getCachedHTML: function (url, returnHtmlDataCallback) {
             var cacheTimeInMs = 1209600000; // two weeks
             var currentTimeInMs = new Date().getTime();
@@ -53,7 +54,7 @@
      */
 
     String.prototype.contains = function(substring) {
-        return this.indexOf(substring) !== -1;
+        return (this.indexOf(substring) !== -1);
     }
 
     /**
@@ -61,8 +62,7 @@
      * Aim is to update last updated time into something more human readable and warn for possible abandoned fics.
      */
 
-    var Parser;
-    Parser = {
+    var Parser = {
         textToBeParsed: null,
         rated: null,
         language: null,
@@ -191,7 +191,7 @@
             this.$appendToEl.empty();
 
             for (var i = 1; i <= this.getChapterAmount(); i++) {
-                var $div = $('<div>', {class: "prefilled-chapter chapter"+ i.toString()});
+                var $div = $('<div>', {class: "prefilled-chapter chapter" + i.toString()});
                 this.$appendToEl.append($div);
                 $document.trigger('loadChapter', [i, $div]);
             }
