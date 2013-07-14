@@ -1,22 +1,23 @@
 {
-  "manifest_version": 2,
-  "name": "Fanfiction.net Optimizer",
-  "version": "0.1",
-  "description": "Provides a better fanfiction.net reading experience.",
-  "permissions": [
-    "tabs", "*://www.fanfiction.net/*", "unlimitedStorage", "storage"
-  ],
-  "content_scripts": [
-    {
-      "matches": ["*://www.fanfiction.net/*"],
-      "js": [
-          "components/jquery/jquery.min.js",
-          "components/underscore/underscore-min.js",
-          "main.js"
-      ],
-      "css": ["style.css"],
-      "run_at": "document_end",
-      "all_frames": true
-    }
-  ]
+    "manifest_version": 2,
+    "name": "Fanfiction.net Optimizer",
+    "version": "0.1",
+    "description": "Provides a better fanfiction.net reading experience.",
+    "permissions": [
+        "tabs", "*://www.fanfiction.net/*", "unlimitedStorage", "storage"
+    ],
+    "options_page": "options.html",
+    "content_scripts": [
+        {
+            "matches": ["*://www.fanfiction.net/*"],
+            "js": [
+                "components/jquery/jquery.min.js",
+                "components/underscore/underscore-min.js",
+                "main.js"
+            ],
+            "css": ["style.css"],
+            "run_at": "document_end",
+            "all_frames": true
+        }
+    ]
 }
