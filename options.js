@@ -53,8 +53,9 @@
 
 (function($, chrome){
     "use strict";
-
-    chrome.storage.local.get(function(urls){
-        console.log(urls);
+    chrome.storage.local.get(function(OfflineCache){
+        _.each(OfflineCache, function(chapter){
+            console.log(chapter.data);
+        });
     });
 })(jQuery, chrome);
