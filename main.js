@@ -4,31 +4,40 @@
     var $document = $(document);
 
     $.extend({
-        getCachedHTML: function (url, returnHtmlDataCallback) {
+        loadCachedChapterContent: function (chapterNumber, url, returnChapterContentCallback) {
             var cacheTimeInMs = 1209600000; // two weeks
             var currentTimeInMs = new Date().getTime();
 
             var cache = {
-                data:null,
-                timestamp:null
+                url: url,
+                chapterNumber: chapterNumber,
+                timestamp: new Date().getTime(),
+                data: null,
+                chapter: null,
+                extractChapterFromContent: function(){
+                    this.chapter = $(this.data).find('#storytext').html();
+                }
             };
 
             var getChapterContentByGetRequest = function(){
                 console.log('use getRequest');
                 $.get(url, function (data) {
                     cache.data = data;
-                    cache.timestamp = new Date().getTime();
+                    cache.extractChapterFromContent();
 
                     var persist = {};
                     persist[url] = cache;
 
                     chrome.storage.local.set(persist);
 
-                    returnHtmlDataCallback(cache.data);
+                    console.log(cache);
+
+                    returnChapterContentCallback(cache.chapter);
                 }, 'html');
             }
 
             chrome.storage.local.get(url, function(cachedUrl){
+                console.log('cache');
                 if (Object.keys(cachedUrl).length === 0) {
                     getChapterContentByGetRequest();
                     return;
@@ -37,12 +46,14 @@
                 var validCache = (currentTimeInMs - cachedUrl[url].timestamp) < cacheTimeInMs;
 
                 if (!validCache) {
+                    console.log('cache invalid');
                     getChapterContentByGetRequest();
                     return;
                 }
 
                 console.log('cache is valid');
-                returnHtmlDataCallback(cachedUrl[url].data);
+                console.log(cachedUrl[url].chapter);
+                returnChapterContentCallback(cachedUrl[url].chapter);
                 return;
             });
         }
@@ -147,45 +158,51 @@
         currentChapter: null,
         $appendToEl: null,
         maxChapter: null,
+        storyId: null,
+        title: null,
         isStoryPage: function(){
             return window.location.pathname.indexOf("fanfiction.net/s/") !== 0
         },
         getChapterAmount: function(){
             var $lastOption = $('#chap_select').find("option:last");
-            var lastChapter = + $lastOption[0].value; // unary plus to cast to int
+
+            var lastChapter;
+
+            try{
+                lastChapter = + $lastOption[0].value || 1; // unary plus to cast to int
+            } catch(e) {
+                lastChapter = 1;
+            }
 
             return lastChapter;
         },
-        getUrlForChapter: function(chapterNumber){
+        parseUrl: function(){
             var pathname = window.location.pathname;
             var arr = pathname.split('/');
             var lastThreeElements = arr.slice(Math.max(arr.length - 3, 1));
 
-            var storyId = lastThreeElements[0].toString();
+            this.storyId = lastThreeElements[0].toString();
             this.currentChapter = lastThreeElements[1];
-            var title = lastThreeElements[2].toString();
-
-            var newChapterUrl =
-                window.location.origin +
-                    "/s/" + storyId +
+            this.title = lastThreeElements[2].toString();
+        },
+        getUrlForChapter: function(chapterNumber){
+            return window.location.origin +
+                    "/s/" + this.storyId +
                     "/" + chapterNumber.toString() +
-                    "/" + title;
-
-            return newChapterUrl;
+                    "/" + this.title;
         },
         bind: function(){
             var self = this;
             $document.on('loadChapter', function(event, chapterNumber, $el){
                 var url = self.getUrlForChapter(chapterNumber);
-                $.getCachedHTML(url, function(html) {
-                    var content = $(html).find('#storytext').html();
-                    $el.html(content);
+                $.loadCachedChapterContent(chapterNumber, url, function(chapterText) {
+                    $el.html(chapterText);
                 });
             });
         },
         init: function() {
             if (!this.isStoryPage()){return};
-
+            this.parseUrl();
             this.bind();
             this.$appendToEl = $('#storytext');
             this.$appendToEl.empty();
