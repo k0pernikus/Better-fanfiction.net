@@ -2,20 +2,20 @@
     "manifest_version": 2,
     "name": "Fanfiction.net Optimizer",
     "version": "0.1",
-    "description": "Provides a better fanfiction.net reading experience.",
+    "description": "Better fanfiction.net reading experience and adds an offline mode.",
     "permissions": [
         "tabs", "*://www.fanfiction.net/*", "unlimitedStorage", "storage"
     ],
-    "options_page": "options.html",
+    "options_page": "html/options.html",
     "content_scripts": [
         {
             "matches": ["*://www.fanfiction.net/*"],
             "js": [
                 "components/jquery/jquery.min.js",
                 "components/underscore/underscore-min.js",
-                "main.js"
+                "js/contentScript.js"
             ],
-            "css": ["style.css"],
+            "css": ["style/style.css"],
             "run_at": "document_end",
             "all_frames": true
         }
@@ -25,10 +25,11 @@
         "default_icon": "icons/icon.png"
     },
     "background": {
-        "scripts": ["background.js"],
+        "scripts": ["js/background.js"],
         "persistent": false
     },
     "web_accessible_resources":[
-        "components/jquery/jquery.min.js",
-        "components/underscore-min.js"]
+        "components/jquery/jquery.min.map",
+        "components/underscore-min.map"
+    ]
 }
