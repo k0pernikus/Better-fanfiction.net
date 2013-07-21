@@ -1,28 +1,51 @@
+.darkfont
+  color: orange !important
+  background-color: #000000 !important
+
 @font-face
   font-family: 'Fauna One'
   font-style: normal
   font-weight: 400
   src: local('Fauna One'), local('FaunaOne-Regular'), url(http://themes.googleusercontent.com/static/fonts/faunaone/v1/cSd7NBXNFQWK4oX1706dYz8E0i7KZn-EPnyo3HZu7kw.woff) format('woff')
 
-html, body, div
+html, body
+  @extend .darkfont
+
+html, body, div, p
   max-width: 100% !important
-  min-width: 0% !important
+  //min-width: 0% !important
   box-sizing: border-box !important
   font-family: 'Fauna One' !important
 
 div#content_parent
-  min-width: 0px !important
+  @extend .darkfont
+  //min-width: 0px !important
 
 div#content_wrapper, div#p_footer, div.tcat, td
-  background-color: black !important
-  color: yellow
+  @extend .darkfont
+
+  .prefilled-chapter p
+    text-align: justify !important
+    line-hight: 1.5
+
 
 a, a:active, a:visited
-  color: darkorange !important
-  
+  @extend .darkfont
+
+a
+  color: greenyellow
+  &:visited
+    color: darkolivegreen
 
 div#share_providers
   display: none !important
 
-div.prefilled-chapter
-  border-top: 1px solid red
+div.prefilled-chapter, div.chapter
+  padding: 15px
+  border-bottom: 1px dotted orange
+  margin-bottom: 35px
+  line-height: 1.75
+  p
+    text-align: justify !important
+    text-indent: 40px !important
+

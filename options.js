@@ -1,14 +1,14 @@
-(function (document, storage, $) {
+(function (document, chrome, $) {
     "use strict";
     // Save this script as `options.js`
 
 
     var PrefillerConfig = {
-        sortid: 3,
-        timeid: 0,
-        censorid: 10,
+        sortId: 3,
+        timeId: 0,
+        censorId: 10,
         language: 1,
-        statusid: 2
+        statusId: 2
     };
 
     function save_options() {
@@ -17,8 +17,8 @@
         var bg_color = select.children[select.selectedIndex].value;
         colors = {bg_color: bg_color};
 
-        storage.sync.set(colors);
-        storage.sync.set(PrefillerConfig);
+        chrome.storage.sync.set(colors);
+        chrome.storage.sync.set(PrefillerConfig);
 
         var status = document.getElementById("status");
         status.innerHTML = "Options Saved.";
@@ -30,7 +30,7 @@
     function restore_options() {
         console.log('wtf');
 
-        storage.sync.get("colors", function (colors) {
+        chrome.storage.sync.get("colors", function (colors) {
             console.log(colors);
 
             if (!colors) {
@@ -49,13 +49,4 @@
 
     document.addEventListener('DOMContentLoaded', restore_options);
     document.querySelector('#save').addEventListener('click', save_options);
-})(document, chrome.storage, jQuery);
-
-(function($, chrome){
-    "use strict";
-    chrome.storage.local.get(function(OfflineCache){
-        _.each(OfflineCache, function(chapter){
-            console.log(chapter.data);
-        });
-    });
-})(jQuery, chrome);
+})(document, chrome, jQuery);

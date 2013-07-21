@@ -3,6 +3,8 @@
 
     var $document = $(document);
 
+    var storyTextId = '#storytext';
+
     $.extend({
         loadCachedChapterContent: function (chapterNumber, url, returnChapterContentCallback) {
             var cacheTimeInMs = 1209600000; // two weeks
@@ -15,12 +17,12 @@
                 data: null,
                 chapter: null,
                 extractChapterFromContent: function(){
-                    this.chapter = $(this.data).find('#storytext').html();
+                    this.chapter = $(this.data).find(storyTextId).html();
                 }
             };
 
             var getChapterContentByGetRequest = function(){
-                console.log('use getRequest');
+                console.log('use uncached getRequest');
                 $.get(url, function (data) {
                     cache.data = data;
                     cache.extractChapterFromContent();
@@ -37,7 +39,6 @@
             }
 
             chrome.storage.local.get(url, function(cachedUrl){
-                console.log('cache');
                 if (Object.keys(cachedUrl).length === 0) {
                     getChapterContentByGetRequest();
                     return;
@@ -64,9 +65,9 @@
      * @returns {boolean}
      */
 
-    String.prototype.contains = function(substring) {
+    String.prototype.contains = function (substring) {
         return (this.indexOf(substring) !== -1);
-    }
+    };
 
     /**
      * Parses fanfic description.
@@ -74,6 +75,8 @@
      */
 
     var Parser = {
+        today: null,
+        $ficInfo: null,
         textToBeParsed: null,
         rated: null,
         language: null,
@@ -86,10 +89,11 @@
         updatedAt: null,
         publishedAt: null,
         relationships: null,
-        init: function (textToBeParsed) {
-            this.textToBeParsed = textToBeParsed;
+        init: function ($ficInfo) {
+            this.$ficInfo = $ficInfo;
+            this.today = new Date.getTime();
+            this.textToBeParsed = $ficInfo.html();
             var array = this.textToBeParsed.split(" - ");
-
             var self = this;
 
             $.each(array, function (index, string) {
@@ -102,11 +106,11 @@
                 }
 
                 if (string.contains("Updated: ")) {
-                    self.updatedAt = this.replace(/Updated: /, "");;
+                    self.updatedAt = this.replace(/Updated: /, "");
                 }
 
                 if (string.contains("Published: ")) {
-                    self.publishedAt = this.replace(/Published: /, "");;
+                    self.publishedAt = this.replace(/Published: /, "");
                 }
             });
         }
@@ -116,11 +120,11 @@
         $form: null,
         $selectBoxes: null,
         config: {
-            sortid: 3,
-            timeid: 0,
-            censorid: 10,
+            sortId: 3,
+            timeId: 0,
+            censorId: 10,
             language: 1,
-            statusid: 2
+            statusId: 2
         },
         setValuesForSelectboxes: function() {
             var self = this;
@@ -133,7 +137,7 @@
         $formExistsInDom: function(){
             return this.$form.length > 0;
         },
-        $formWasSubmitted: function(){
+        $wasFormAlreadySubmittedAssumption: function(){
             var $url = window.location.pathname;
             return $url.split('/').length > 5;
         },
@@ -145,7 +149,7 @@
             this.$form = $form;
             this.$selectBoxes = this.$form.find('select');
 
-            if (!this.$formExistsInDom() || this.$formWasSubmitted()){
+            if (!this.$formExistsInDom() || this.$wasFormAlreadySubmittedAssumption()){
                 return;
             }
 
@@ -204,7 +208,7 @@
             if (!this.isStoryPage()){return};
             this.parseUrl();
             this.bind();
-            this.$appendToEl = $('#storytext');
+            this.$appendToEl = $(storyTextId);
             this.$appendToEl.empty();
 
             for (var i = 1; i <= this.getChapterAmount(); i++) {
@@ -220,9 +224,9 @@
         SearchBoxPrefiller.init($searchBox);
         FullStoryLoader.init();
 
-//        $("div.z-padtop2").each(function(){
-//            Parser.init($(this).html());
-//        });
+        $("div.z-padtop2").each(function(){
+            Parser.init($(this));
+        });
 
         /**
          * Remove Twitter infos

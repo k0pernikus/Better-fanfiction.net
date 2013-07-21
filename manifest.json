@@ -19,5 +19,16 @@
             "run_at": "document_end",
             "all_frames": true
         }
-    ]
+    ],
+    "browser_action": {
+        "default_title": "cached_fics_view",
+        "default_icon": "icons/icon.png"
+    },
+    "background": {
+        "scripts": ["background.js"],
+        "persistent": false
+    },
+    "web_accessible_resources":[
+        "components/jquery/jquery.min.js",
+        "components/underscore-min.js"]
 }
