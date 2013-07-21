@@ -122,7 +122,7 @@
         }
     };
 
-    var SearchBoxPrefi  ller = {
+    var SearchBoxPrefiller = {
         $form: null,
         $selectBoxes: null,
         config: {
