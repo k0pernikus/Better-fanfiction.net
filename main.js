@@ -1,4 +1,4 @@
-(function($, _, document, chrome) {
+(function ($, _, document, chrome) {
     "use strict";
 
     var $document = $(document);
@@ -6,39 +6,41 @@
     var storyTextId = '#storytext';
 
     $.extend({
-        loadCachedChapterContent: function (chapterNumber, url, returnChapterContentCallback) {
+        loadCachedChapterContent: function (storyLoader, chapterNumber, url, returnChapterContentCallback) {
             var cacheTimeInMs = 1209600000; // two weeks
             var currentTimeInMs = new Date().getTime();
 
             var cache = {
+                title: storyLoader.title,
                 url: url,
                 chapterNumber: chapterNumber,
                 timestamp: new Date().getTime(),
                 data: null,
                 chapter: null,
-                extractChapterFromContent: function(){
+                extractChapterFromContent: function () {
                     this.chapter = $(this.data).find(storyTextId).html();
                 }
             };
 
-            var getChapterContentByGetRequest = function(){
+            var getChapterContentByGetRequest = function () {
                 console.log('use uncached getRequest');
+
+                /**
+                 * TODO: Defer get requests to minimize server load
+                 */
+
                 $.get(url, function (data) {
                     cache.data = data;
                     cache.extractChapterFromContent();
 
                     var persist = {};
                     persist[url] = cache;
-
                     chrome.storage.local.set(persist);
-
-                    console.log(cache);
-
                     returnChapterContentCallback(cache.chapter);
                 }, 'html');
-            }
+            };
 
-            chrome.storage.local.get(url, function(cachedUrl){
+            chrome.storage.local.get(url, function (cachedUrl) {
                 if (Object.keys(cachedUrl).length === 0) {
                     getChapterContentByGetRequest();
                     return;
@@ -90,6 +92,10 @@
         publishedAt: null,
         relationships: null,
         init: function ($ficInfo) {
+            /**
+             * TODO: Implement me
+             */
+
             this.$ficInfo = $ficInfo;
             this.today = new Date.getTime();
             this.textToBeParsed = $ficInfo.html();
@@ -114,9 +120,9 @@
                 }
             });
         }
-    }
+    };
 
-    var SearchBoxPrefiller = {
+    var SearchBoxPrefi  ller = {
         $form: null,
         $selectBoxes: null,
         config: {
@@ -126,30 +132,30 @@
             language: 1,
             statusId: 2
         },
-        setValuesForSelectboxes: function() {
+        setValuesForSelectboxes: function () {
             var self = this;
-            this.$selectBoxes.each(function(){
-                if (self.config.hasOwnProperty(this.name)){
+            this.$selectBoxes.each(function () {
+                if (self.config.hasOwnProperty(this.name)) {
                     this.value = self.config[this.name];
                 }
             });
         },
-        $formExistsInDom: function(){
+        $formExistsInDom: function () {
             return this.$form.length > 0;
         },
-        $wasFormAlreadySubmittedAssumption: function(){
+        $wasFormAlreadySubmittedAssumption: function () {
             var $url = window.location.pathname;
             return $url.split('/').length > 5;
         },
-        submitForm: function(){
+        submitForm: function () {
             this.setValuesForSelectboxes();
             this.$form.find('button[type=button]').trigger('click');
         },
-        init: function($form) {
+        init: function ($form) {
             this.$form = $form;
             this.$selectBoxes = this.$form.find('select');
 
-            if (!this.$formExistsInDom() || this.$wasFormAlreadySubmittedAssumption()){
+            if (!this.$formExistsInDom() || this.$wasFormAlreadySubmittedAssumption()) {
                 return;
             }
 
@@ -164,23 +170,23 @@
         maxChapter: null,
         storyId: null,
         title: null,
-        isStoryPage: function(){
-            return window.location.pathname.indexOf("fanfiction.net/s/") !== 0
+        isStoryPage: function () {
+            return window.location.pathname.indexOf("fanfiction.net/s/") !== 0;
         },
-        getChapterAmount: function(){
+        getChapterAmount: function () {
             var $lastOption = $('#chap_select').find("option:last");
 
             var lastChapter;
 
-            try{
-                lastChapter = + $lastOption[0].value || 1; // unary plus to cast to int
-            } catch(e) {
+            try {
+                lastChapter = +$lastOption[0].value || 1; // unary plus to cast to int
+            } catch (e) {
                 lastChapter = 1;
             }
 
             return lastChapter;
         },
-        parseUrl: function(){
+        parseUrl: function () {
             var pathname = window.location.pathname;
             var arr = pathname.split('/');
             var lastThreeElements = arr.slice(Math.max(arr.length - 3, 1));
@@ -188,24 +194,27 @@
             this.storyId = lastThreeElements[0].toString();
             this.currentChapter = lastThreeElements[1];
             this.title = lastThreeElements[2].toString();
+            this.title = this.title.replace(/-/, "");
         },
-        getUrlForChapter: function(chapterNumber){
+        getUrlForChapter: function (chapterNumber) {
             return window.location.origin +
-                    "/s/" + this.storyId +
-                    "/" + chapterNumber.toString() +
-                    "/" + this.title;
+                "/s/" + this.storyId +
+                "/" + chapterNumber.toString() +
+                "/" + this.title;
         },
-        bind: function(){
+        bind: function () {
             var self = this;
-            $document.on('loadChapter', function(event, chapterNumber, $el){
+            $document.on('loadChapter', function (event, chapterNumber, $el) {
                 var url = self.getUrlForChapter(chapterNumber);
-                $.loadCachedChapterContent(chapterNumber, url, function(chapterText) {
+                $.loadCachedChapterContent(this, chapterNumber, url, function (chapterText) {
                     $el.html(chapterText);
                 });
             });
         },
-        init: function() {
-            if (!this.isStoryPage()){return};
+        init: function () {
+            if (!this.isStoryPage()) {
+                return;
+            }
             this.parseUrl();
             this.bind();
             this.$appendToEl = $(storyTextId);
@@ -217,14 +226,14 @@
                 $document.trigger('loadChapter', [i, $div]);
             }
         }
-    }
+    };
 
-    $document.ready(function(){
+    $document.ready(function () {
         var $searchBox = $("#myform");
         SearchBoxPrefiller.init($searchBox);
         FullStoryLoader.init();
 
-        $("div.z-padtop2").each(function(){
+        $("div.z-padtop2").each(function () {
             Parser.init($(this));
         });
 
