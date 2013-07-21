@@ -2,8 +2,9 @@
     "use strict";
 
     var $document = $(document);
-
     var storyTextId = '#storytext';
+
+
 
     $.extend({
         loadCachedChapterContent: function (storyLoader, chapterNumber, url, returnChapterContentCallback) {

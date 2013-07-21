@@ -21,4 +21,23 @@
             }
         });
     });
+
+    var $document = $(document);
+
+    $document.on('logAllCache', function(){
+        chrome.storage.local.get(function(OfflineCache){
+            for (var key in OfflineCache) {
+                console.log(key);
+            }
+        });
+    });
+
+    $document.on('clearAllCache', function(){
+        chrome.storage.local.clear();
+    });
+
+    $('span#deleteAllCache').on('click', function(){
+        console.warn('should ask first');
+        $document.trigger('clearAllCache');
+    });
 })(jQuery, chrome, document, _);
