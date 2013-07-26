@@ -3,9 +3,15 @@
     var $content = $('#content');
 
     chrome.storage.local.get(function(OfflineCache){
+        console.log(OfflineCache);
         _.each(OfflineCache, function(chapter) {
             try {
-                var $titleSpan = $('<h1>', {
+                var $storyTitleSpan = $('<h1>',{
+                    class: 'storyTitle',
+                    html: "Titel" + chapter.title
+                })
+
+                var $titleSpan = $('<h2>', {
                     class: "chapterTitle",
                     html: "Chapter " + chapter.chapterNumber.toString()
                 });
@@ -15,7 +21,7 @@
                     html: chapter.chapter
                 });
 
-                $content.append($titleSpan).append($div);
+                $content.append($storyTitleSpan).append($titleSpan).append($div);
             } catch(e){
                 console.error('malformed chapter data');
             }

@@ -4,23 +4,36 @@
     var $document = $(document);
     var storyTextId = '#storytext';
 
-
+    var story = {
+        url: null,
+        storyId: null,
+        title: null,
+        author: null,
+        chapters: {
+            number: null,
+            rawHtmlData: null,
+            content: null
+        }
+    }
 
     $.extend({
         loadCachedChapterContent: function (storyLoader, chapterNumber, url, returnChapterContentCallback) {
             var cacheTimeInMs = 1209600000; // two weeks
             var currentTimeInMs = new Date().getTime();
 
-            var cache = {
-                title: storyLoader.title,
-                url: url,
-                chapterNumber: chapterNumber,
+            var currentChapter = {
+                number: chapterNumber,
                 timestamp: new Date().getTime(),
                 data: null,
                 chapter: null,
+                url: url,
                 extractChapterFromContent: function () {
-                    this.chapter = $(this.data).find(storyTextId).html();
-                }
+                this.chapter = $(this.data).find(storyTextId).html();
+            };
+
+            var cache = {
+                author: null,
+                title: storyLoader.title,
             };
 
             var getChapterContentByGetRequest = function () {
@@ -31,13 +44,18 @@
                  */
 
                 $.get(url, function (data) {
-                    cache.data = data;
-                    cache.extractChapterFromContent();
+                    currentChapter.data = data;
+                    currentChapter.extractChapterFromContent();
 
                     var persist = {};
-                    persist[url] = cache;
-                    chrome.storage.local.set(persist);
-                    returnChapterContentCallback(cache.chapter);
+
+                    /**
+                     *  GET STORY STORAGE OBJECT
+                     */
+
+                    persist[GET_STORY_PROP].push(currentChapter);
+                    chrome.storage.local.set(GET_STORY_PROP);
+                    returnChapterContentCallback(currentChapter.chapter);
                 }, 'html');
             };
 
